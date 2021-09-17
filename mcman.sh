@@ -1,19 +1,19 @@
 #!/bin/bash
 
 function usage {
-  echo "Usage: $(basename $0) [ARGS] [OPTION]" 2>&1
-  echo 'Manage Minecraft servers using screens.'
-  echo 
-  echo '   start        Start a server'
+	echo "Usage: $(basename $0) [ARGS] [OPTION]" 2>&1
+	echo 'Manage Minecraft servers using screens.'
+	echo 
+	echo '   start        Start a server'
 	echo '   attach       Reattach to a running server console'
-  echo 
-  echo '   -d DIRECTORY	Specify the server directory'
-  echo '   -s FILE      Specify the file to run to start the server, has to be directly executable'
+	echo 
+  	echo '   -d DIRECTORY	Specify the server directory'
+	echo '   -s FILE      Specify the file to run to start the server, has to be directly executable'
 	echo '   -t           Dont attach to the screen'
-  echo 
+	echo 
 	echo 'v1.0'
-  echo 'Made by enjarai'
-  exit 1
+	echo 'Made by enjarai'
+	exit 1
 }
 
 if [[ ${#} -eq 0 ]]; then

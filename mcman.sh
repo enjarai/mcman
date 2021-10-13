@@ -7,16 +7,18 @@ function usage {
   echo '   start        Start a server'
   echo '     -d DIRECTORY	Specify the server directory'
   echo '     -f FILE      Specify the file to run to start the server, has to be directly executable'
-  echo '     -t           Dont attach to the screen'
+	echo '     -t           Dont attach to the screen'
 	echo '   attach       Reattach to a running server console'
 	echo '     -s           Start server if not running already, works with arguments from the start option'
 	echo '   stop         Stop a running server'
 	echo '     -k           Force stopping the server'
 	echo '   restart      Restart a running server'
+	echo '   send         Send input to the console of a running server'
+	echo '     -m           Input to send'
 	echo
 	echo '   -n NAME      Specify the server name, defaults to "mc-auto"'
   echo 
-	echo 'v1.1'
+	echo 'v1.2'
   echo 'Made by enjarai'
   exit 1
 }
@@ -38,7 +40,7 @@ done"
 		echo "Create '$startfile' first."
 		exit 2
 	fi
-}													
+}												
 
 function wait_for_screen {
 	while screen -list | grep -q "$screenname"; do
@@ -50,8 +52,12 @@ function stop_server {
 	if $forcekill; then
     screen -XS "$screenname" quit
   else
-  	screen -XS "$screenname" -p 0 stuff "stop^M"
+  	send_input "stop"
 	fi
+}
+
+function send_input {
+	screen -XS "$screenname" -p 0 stuff "^M$1^M"
 }
 
 if [[ ${#} -eq 0 ]]; then
@@ -65,7 +71,7 @@ startserver=false
 forcekill=false
 
 while [ $# -gt 0 ] && [ "$1" != "--" ]; do
-	while getopts ":d:f:tn:sk" arg; do
+	while getopts ":d:f:tn:skm:" arg; do
 		case ${arg} in
 			d)
 				directory="${OPTARG}"
@@ -84,6 +90,9 @@ while [ $# -gt 0 ] && [ "$1" != "--" ]; do
 				;;
 			k)
 				forcekill=true
+				;;
+			m)
+				message="${OPTARG}"
 				;;
 			?)
 				echo "Invalid option: -${OPTARG}."
@@ -126,6 +135,9 @@ case $option in
 		;;
 	restart)
 		stop_server
+		;;
+	send)
+		send_input "$message"
 		;;
 	*)
 		usage

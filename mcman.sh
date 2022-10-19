@@ -1,12 +1,12 @@
 #!/bin/bash
 
 function usage {
-  echo "Usage: $(basename $0) [ARGS] [OPTION]" 2>&1
-  echo 'Manage Minecraft servers using screens.'
-  echo  
-  echo '   start        Start a server'
-  echo '     -d DIRECTORY	Specify the server directory'
-  echo '     -f FILE      Specify the file to run to start the server, has to be directly executable'
+	echo "Usage: $(basename $0) [ARGS] [OPTION]" 2>&1
+	echo 'Manage Minecraft servers using screens.'
+	echo  
+	echo '   start        Start a server'
+	echo '     -d DIRECTORY	Specify the server directory'
+  	echo '     -f FILE      Specify the file to run to start the server, has to be directly executable'
 	echo '     -t           Dont attach to the screen'
 	echo '   attach       Reattach to a running server console'
 	echo '     -s           Start server if not running already, works with arguments from the start option'
@@ -15,12 +15,16 @@ function usage {
 	echo '   restart      Restart a running server'
 	echo '   send         Send input to the console of a running server'
 	echo '     -m           Input to send'
+	echo '   create       Create a new server in a directory'
+	echo '     -j           Java binary to use, defaults to "java"'
+	echo '     -M           Minecraft version to use, defaults to latest'
+	echo '     -d DIRECTORY	The server directory'
 	echo
 	echo '   -n NAME      Specify the server name, defaults to "mc-auto"'
-  echo 
-	echo 'v1.2'
-  echo 'Made by enjarai'
-  exit 1
+	echo 
+	echo 'v1.3'
+	echo 'Made by enjarai'
+	exit 1
 }
 
 function start_server {
@@ -50,14 +54,33 @@ function wait_for_screen {
 
 function stop_server {
 	if $forcekill; then
-    screen -XS "$screenname" quit
-  else
-  	send_input "stop"
+		screen -XS "$screenname" quit
+	else
+		send_input "stop"
 	fi
 }
 
 function send_input {
 	screen -XS "$screenname" -p 0 stuff "^M$1^M"
+}
+
+function create {
+	installer="fabric-installer-${fabricinstallerversion}.jar"
+	installerpath="$directory/$installer"
+	
+	wget "https://maven.fabricmc.net/net/fabricmc/fabric-installer/$fabricinstallerversion/$installer" -P "$directory/"
+	opts=""
+
+	opts+="-dir $directory "
+	if [ "$minecraftversion" != "latest" ]; then
+		opts+="-mcversion $minecraftversion "
+	fi
+	opts+="-downloadMinecraft "
+
+	$java -jar "$installerpath" server $opts
+
+	echo "$java -Xmx2G -jar fabric-server-launch.jar nogui" > start.sh
+	chmod u+x start.sh
 }
 
 if [[ ${#} -eq 0 ]]; then
@@ -69,9 +92,12 @@ directory="./"
 screenname="mc-auto"
 startserver=false
 forcekill=false
+java="java"
+fabricinstallerversion="0.11.1"
+minecraftversion="latest"
 
 while [ $# -gt 0 ] && [ "$1" != "--" ]; do
-	while getopts ":d:f:tn:skm:" arg; do
+	while getopts ":d:f:tn:skm:j:M:" arg; do
 		case ${arg} in
 			d)
 				directory="${OPTARG}"
@@ -93,6 +119,12 @@ while [ $# -gt 0 ] && [ "$1" != "--" ]; do
 				;;
 			m)
 				message="${OPTARG}"
+				;;
+			j)
+				java="${OPTARG}"
+				;;
+			M)
+				minecraftversion="${OPTARG}"
 				;;
 			?)
 				echo "Invalid option: -${OPTARG}."
@@ -138,6 +170,9 @@ case $option in
 		;;
 	send)
 		send_input "$message"
+		;;
+	create)
+		create
 		;;
 	*)
 		usage

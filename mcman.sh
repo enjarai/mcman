@@ -65,6 +65,8 @@ function send_input {
 }
 
 function create {
+	read -n 1 -s -r -p "Press any key to accept the Minecraft EULA, or ctrl+C to cancel."
+
 	installer="fabric-installer-${fabricinstallerversion}.jar"
 	installerpath="$directory/$installer"
 	
@@ -78,8 +80,9 @@ function create {
 	opts+="-downloadMinecraft "
 
 	$java -jar "$installerpath" server $opts
+	echo "$sensibleserverproperties" > $directory/server.properties
 
-	echo "$java -Xmx2G -jar fabric-server-launch.jar nogui" > start.sh
+	echo "$java -Xmx2G -jar fabric-server-launch.jar nogui" > $directory/start.sh
 	chmod u+x start.sh
 }
 
@@ -95,6 +98,64 @@ forcekill=false
 java="java"
 fabricinstallerversion="0.11.1"
 minecraftversion="latest"
+sensibleserverproperties="
+	motd=A Minecraft Server
+	server-port=25565
+	difficulty=normal
+	level-seed=
+	white-list=false
+	enforce-whitelist=false
+
+	enable-jmx-monitoring=false
+	rcon.port=25575
+	enable-command-block=true
+	gamemode=survival
+	enable-query=false
+	generator-settings={}
+	enforce-secure-profile=false
+	level-name=world
+	query.port=25565
+	pvp=true
+	generate-structures=true
+	max-chained-neighbor-updates=1000000
+	network-compression-threshold=256
+	max-tick-time=60000
+	require-resource-pack=false
+	max-players=20
+	use-native-transport=true
+	online-mode=true
+	enable-status=true
+	allow-flight=true
+	broadcast-rcon-to-ops=true
+	view-distance=10
+	resource-pack-prompt=
+	server-ip=
+	allow-nether=true
+	enable-rcon=false
+	sync-chunk-writes=true
+	op-permission-level=4
+	prevent-proxy-connections=false
+	hide-online-players=false
+	resource-pack=
+	entity-broadcast-range-percentage=100
+	simulation-distance=10
+	rcon.password=
+	player-idle-timeout=0
+	force-gamemode=false
+	rate-limit=0
+	hardcore=false
+	broadcast-console-to-ops=true
+	previews-chat=false
+	spawn-npcs=true
+	spawn-animals=true
+	function-permission-level=2
+	level-type=minecraft\:normal
+	text-filtering-config=
+	spawn-monsters=true
+	spawn-protection=0
+	resource-pack-sha1=
+	max-world-size=29999984
+"
 
 while [ $# -gt 0 ] && [ "$1" != "--" ]; do
 	while getopts ":d:f:tn:skm:j:M:" arg; do
